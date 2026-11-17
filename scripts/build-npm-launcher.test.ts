@@ -262,7 +262,7 @@ it.layer(NodeServices.layer)("build-npm-launcher", (it) => {
         yield* fs.writeFileString(
           forkReleaseHook,
           `const fetchRelease = globalThis.fetch;
-const prefix = "https://github.com/ScriptedAlchemy/t3code/releases/download";
+const prefix = "https://github.com/naftpink/t3code/releases/download";
 globalThis.fetch = (input, options) => {
   const url = String(input);
   if (!url.startsWith(prefix + "/")) throw new Error("Unexpected release URL: " + url);
@@ -295,7 +295,7 @@ globalThis.fetch = (input, options) => {
         );
         assert.equal(unsupported.exitCode, 1);
         assert.include(unsupported.stderr, "no T3 Code CLI build is available for darwin-x64");
-        assert.include(unsupported.stderr, "https://github.com/ScriptedAlchemy/t3code/releases");
+        assert.include(unsupported.stderr, "https://github.com/naftpink/t3code/releases");
 
         const ipcServer = path.join(home, "runtime/versions", VERSION, "t3");
         yield* fs.writeFileString(
