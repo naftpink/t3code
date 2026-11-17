@@ -20,7 +20,12 @@ export interface Handlers {
     botKey: string;
     prompt: string;
     mode?: string;
+    project?: string;
   }): Promise<string>;
+  /** `/project list|use|add`. */
+  onProject(c: { action: string; name?: string; path?: string }): Promise<string>;
+  /** Autocomplete for project fields: up to 25 {name, value} matches. */
+  projectChoices(query: string): Promise<Array<{ name: string; value: string }>>;
   /** A plain message from the allowed user inside a bridged thread. */
   onMessage(c: { channelId: string; text: string }): Promise<void>;
   onStop(c: { channelId: string }): Promise<string>;
@@ -86,6 +91,8 @@ export class DryRunChat implements Chat {
       const [, bot, ...rest] = t.split(/\s+/);
       const at = rest.indexOf("--mode");
       const mode = at >= 0 ? rest.splice(at, 2)[1] : undefined;
+      const pat = rest.indexOf("--project");
+      const project = pat >= 0 ? rest.splice(pat, 2)[1] : undefined;
       console.log(
         "[reply]",
         await this.h.onNew({
@@ -93,8 +100,22 @@ export class DryRunChat implements Chat {
           botKey: bot!,
           prompt: rest.join(" "),
           ...(mode ? { mode } : {}),
+          ...(project ? { project } : {}),
         }),
       );
+    } else if (t.startsWith("/project ")) {
+      // `/project list` | `/project use <name>` | `/project add <path> [name]`
+      const [, action, ...rest] = t.split(/\s+/);
+      const arg = rest.join(" ");
+      const call =
+        action === "add"
+          ? {
+              action,
+              path: rest[0] ?? "",
+              ...(rest.length > 1 ? { name: rest.slice(1).join(" ") } : {}),
+            }
+          : { action: action ?? "", ...(arg ? { name: arg } : {}) };
+      console.log("[reply]", await this.h.onProject(call));
     } else if (t.startsWith("> "))
       await this.h.onMessage({ channelId: this.lastThread, text: t.slice(2) });
     else if (t === "/stop")

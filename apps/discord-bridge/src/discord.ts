@@ -93,7 +93,8 @@ export class DiscordChat implements Chat {
           : [GatewayIntentBits.Guilds],
       });
       client.on(Events.InteractionCreate, (i) => {
-        if (i.isButton()) void this.onButton(i);
+        if (i.isAutocomplete()) void this.onAutocomplete(i);
+        else if (i.isButton()) void this.onButton(i);
         else if (isControl && i.isChatInputCommand()) void this.onSlash(i);
       });
       if (isControl) {
@@ -137,6 +138,12 @@ export class DiscordChat implements Chat {
         )
         .addStringOption((o) =>
           o
+            .setName("project")
+            .setDescription("Project for this thread (default: the current one)")
+            .setAutocomplete(true),
+        )
+        .addStringOption((o) =>
+          o
             .setName("mode")
             .setDescription("How much the agent may do without asking (default: from config)")
             .addChoices(
@@ -147,6 +154,32 @@ export class DiscordChat implements Chat {
             ),
         ),
       new SlashCommandBuilder()
+        .setName("project")
+        .setDescription("List, switch or add the project new threads run in")
+        .addSubcommand((s) => s.setName("list").setDescription("Show your projects"))
+        .addSubcommand((s) =>
+          s
+            .setName("use")
+            .setDescription("Switch the current project")
+            .addStringOption((o) =>
+              o.setName("name").setDescription("Project").setRequired(true).setAutocomplete(true),
+            ),
+        )
+        .addSubcommand((s) =>
+          s
+            .setName("add")
+            .setDescription("Register a folder on the T3 machine as a project and switch to it")
+            .addStringOption((o) =>
+              o
+                .setName("path")
+                .setDescription("Folder path on the T3 machine, e.g. C:\\dev\\myapp")
+                .setRequired(true),
+            )
+            .addStringOption((o) =>
+              o.setName("name").setDescription("Display name (default: folder name)"),
+            ),
+        ),
+      new SlashCommandBuilder()
         .setName("stop")
         .setDescription("Interrupt the agent in this thread"),
       new SlashCommandBuilder().setName("status").setDescription("Show this thread's agent status"),
@@ -154,7 +187,7 @@ export class DiscordChat implements Chat {
     await new REST()
       .setToken(token)
       .put(Routes.applicationGuildCommands(appId, this.cfg.discord.guildId!), { body: commands });
-    console.log("[discord] slash commands registered: /new /stop /status");
+    console.log("[discord] slash commands registered: /new /project /stop /status");
   }
 
   private async onSlash(i: import("discord.js").ChatInputCommandInteraction) {
@@ -175,6 +208,16 @@ export class DiscordChat implements Chat {
           botKey: i.options.getString("agent", true),
           prompt: i.options.getString("prompt", true),
           ...(mode ? { mode } : {}),
+          ...(i.options.getString("project") ? { project: i.options.getString("project")! } : {}),
+        });
+      } else if (i.commandName === "project") {
+        const action = i.options.getSubcommand();
+        const name = i.options.getString("name");
+        const path = i.options.getString("path");
+        text = await this.h.onProject({
+          action,
+          ...(name ? { name } : {}),
+          ...(path ? { path } : {}),
         });
       } else if (i.commandName === "stop") text = await this.h.onStop({ channelId: i.channelId });
       else text = await this.h.onStatus({ channelId: i.channelId });
@@ -182,6 +225,15 @@ export class DiscordChat implements Chat {
     } catch (e) {
       await i.editReply(`Error: ${String(e).slice(0, 300)}`).catch(() => {});
     }
+  }
+
+  private async onAutocomplete(i: import("discord.js").AutocompleteInteraction) {
+    if (!this.authorized(i.user.id)) return void i.respond([]).catch(() => {});
+    const focused = i.options.getFocused(true);
+    if (focused.name !== "project" && focused.name !== "name")
+      return void i.respond([]).catch(() => {});
+    const choices = await this.h.projectChoices(focused.value).catch(() => []);
+    await i.respond(choices).catch(() => {});
   }
 
   private async onButton(i: ButtonInteraction) {

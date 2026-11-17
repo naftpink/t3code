@@ -98,7 +98,7 @@ export class Bridge implements Handlers {
   }
 
   private async ensureProject() {
-    const configured = this.cfg.t3.projectId ?? this.state.projectId;
+    const configured = this.state.projectId ?? this.cfg.t3.projectId;
     if (configured) return void (this.state.projectId = configured);
     const root = NodePath.resolve(ROOT, this.cfg.t3.workspaceRoot);
     NodeFS.mkdirSync(root, { recursive: true });
@@ -145,17 +145,124 @@ export class Bridge implements Handlers {
     return !!this.byChannel(channelId);
   }
 
+  private async listProjects(): Promise<
+    Array<{ id: string; title: string; workspaceRoot: string }>
+  > {
+    const projects = await this.t3.call((c) =>
+      c["orchestration.subscribeShell"]({}).pipe(
+        Stream.take(1),
+        Stream.runCollect,
+        Effect.map((items: any) => (Array.from(items)[0] as any)?.snapshot?.projects ?? []),
+      ),
+    );
+    return (projects as any[]).map((p) => ({
+      id: String(p.id),
+      title: String(p.title),
+      workspaceRoot: String(p.workspaceRoot),
+    }));
+  }
+
+  /** Find a project by id, exact title, or a unique part of its title or folder. */
+  private resolveProject(
+    projects: Array<{ id: string; title: string; workspaceRoot: string }>,
+    query: string,
+  ) {
+    const q = query.trim().toLowerCase();
+    const byId = projects.find((p) => p.id === query.trim());
+    if (byId) return { project: byId };
+    const sameTitle = projects.filter((p) => p.title.toLowerCase() === q);
+    if (sameTitle.length === 1) return { project: sameTitle[0]! };
+    if (sameTitle.length > 1)
+      return {
+        error: `${sameTitle.length} projects are called "${query}" (${sameTitle.map((p) => p.workspaceRoot).join(", ")}). Pick one from the autocomplete list, or use part of its folder path.`,
+      };
+    const partial = projects.filter(
+      (p) => p.title.toLowerCase().includes(q) || p.workspaceRoot.toLowerCase().includes(q),
+    );
+    if (partial.length === 1) return { project: partial[0]! };
+    if (partial.length > 1)
+      return {
+        error: `"${query}" matches ${partial.map((p) => p.title).join(", ")}. Be more specific.`,
+      };
+    return { error: `No project matches "${query}". Use /project list.` };
+  }
+
+  async projectChoices(query: string) {
+    const q = query.toLowerCase();
+    const projects = await this.listProjects();
+    return projects
+      .filter((p) => p.title.toLowerCase().includes(q) || p.workspaceRoot.toLowerCase().includes(q))
+      .slice(0, 25)
+      .map((p) => ({
+        name: `${p.title} (${p.workspaceRoot})${p.id === this.state.projectId ? " [current]" : ""}`.slice(
+          0,
+          100,
+        ),
+        value: p.id,
+      }));
+  }
+
+  async onProject({ action, name, path }: { action: string; name?: string; path?: string }) {
+    const projects = await this.listProjects();
+    if (action === "list") {
+      if (projects.length === 0) return "No projects yet. Add one with /project add.";
+      return projects
+        .map(
+          (p) =>
+            `${p.id === this.state.projectId ? "▶" : "•"} **${p.title}**  \`${p.workspaceRoot}\``,
+        )
+        .join("\n");
+    }
+    if (action === "use") {
+      if (!name?.trim()) return "Say which project.";
+      const found = this.resolveProject(projects, name);
+      if (!found.project) return found.error!;
+      this.state.projectId = found.project.id;
+      this.save();
+      return `Now using **${found.project.title}** (\`${found.project.workspaceRoot}\`). New threads start there.`;
+    }
+    if (action === "add") {
+      if (!path?.trim()) return "Give the folder path.";
+      const root = NodePath.resolve(path.trim());
+      if (!NodeFS.existsSync(root) || !NodeFS.statSync(root).isDirectory())
+        return `\`${root}\` isn't an existing folder on the machine running T3.`;
+      const same = projects.find(
+        (p) => NodePath.resolve(p.workspaceRoot).toLowerCase() === root.toLowerCase(),
+      );
+      if (same) {
+        this.state.projectId = same.id;
+        this.save();
+        return `That folder is already the project **${same.title}**. Now using it.`;
+      }
+      const title = name?.trim() || NodePath.basename(root);
+      const id = uuid();
+      await this.t3.createProject(id, title, root);
+      this.state.projectId = id;
+      this.save();
+      return `Added **${title}** (\`${root}\`) and switched to it.`;
+    }
+    return "Unknown project command.";
+  }
+
   async onNew({
     parentChannelId,
     botKey,
     prompt,
     mode,
+    project,
   }: {
     parentChannelId: string;
     botKey: string;
     prompt: string;
     mode?: string;
+    project?: string;
   }) {
+    let projectId = this.state.projectId;
+    if (project?.trim()) {
+      const found = this.resolveProject(await this.listProjects(), project);
+      if (!found.project) return found.error!;
+      projectId = found.project.id;
+    }
     const bot = this.cfg.bots[botKey];
     const runtimeMode = mode ?? this.cfg.runtimeMode;
     if (!(RUNTIME_MODES as readonly string[]).includes(runtimeMode))
@@ -185,7 +292,7 @@ export class Bridge implements Handlers {
         c["orchestration.launchThread"]({
           commandId: CommandId.make(uuid()),
           threadId: ThreadId.make(id),
-          projectId: ProjectId.make(this.state.projectId!),
+          projectId: ProjectId.make(projectId!),
           title,
           modelSelection: { instanceId: ProviderInstanceId.make(bot.instanceId), model: bot.model },
           runtimeMode,
@@ -251,7 +358,10 @@ export class Bridge implements Handlers {
 
   async onStatus({ channelId }: { channelId: string }) {
     const m = this.byChannel(channelId);
-    if (!m) return `Bridging ${Object.keys(this.state.threads).length} thread(s).`;
+    if (!m) {
+      const current = (await this.listProjects()).find((p) => p.id === this.state.projectId);
+      return `Bridging ${Object.keys(this.state.threads).length} thread(s). Current project: ${current ? `${current.title} (${current.workspaceRoot})` : "none"}.`;
+    }
     const proj = await this.projection(m.t3ThreadId);
     const pending = proj.runtimeRequests.filter((r: any) => r.status === "pending").length;
     const last = proj.runs.at(-1);

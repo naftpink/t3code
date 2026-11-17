@@ -86,8 +86,10 @@ export class T3 {
           ) as Effect.Effect<A, any, never>,
         );
       } catch (e) {
-        if (attempt === 0 && /socket|closed|ECONN|WebSocket|fetch failed/i.test(String(e))) {
+        // A restarting server refuses connections for a few seconds; wait it out before giving up.
+        if (attempt < 4 && /socket|closed|ECONN|WebSocket|fetch failed/i.test(String(e))) {
           await this.reset();
+          await sleep(1500 * (attempt + 1));
           continue;
         }
         throw e;

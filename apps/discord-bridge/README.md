@@ -18,6 +18,16 @@ can run on the same machine or anywhere that can reach the server.
    ID: only that account can run commands or press buttons.
 4. Put each bot token in the file named by its `tokenFile` (under `.secrets/`, git-ignored).
 
+## Commands
+
+- `/new agent prompt [project] [mode]` starts a thread in a new Discord thread. `project` overrides the current
+  project for this thread only; `mode` sets how much the agent may do without asking.
+- `/project list` shows your T3 projects, with the current one marked.
+- `/project use name` switches the current project; later `/new` threads start there, and the choice survives restarts.
+- `/project add path [name]` registers a folder on the T3 machine as a project and switches to it. The path must
+  already exist.
+- `/stop` interrupts the agent in the current thread. `/status` shows the thread, or the current project outside one.
+
 ## Run
 
 ```
