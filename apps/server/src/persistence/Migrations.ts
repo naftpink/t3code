@@ -7,6 +7,7 @@ import {
   DATABASE_MIGRATIONS_STARTED_MESSAGE,
 } from "@t3tools/shared/databaseMigrationLog";
 import { reconcileV2PreviewMigration } from "./reconcileV2PreviewMigration.ts";
+import { reconcileOfficialMigrationHistory } from "./reconcileOfficialMigrationHistory.ts";
 import { reconcileProjectKnowledgePreviewMigration } from "./reconcileProjectKnowledgePreviewMigration.ts";
 import { reconcileSavedKnowledgePreviewMigration } from "./reconcileSavedKnowledgePreviewMigration.ts";
 import { reconcileKnowledgeViewsPreviewMigration } from "./reconcileKnowledgeViewsPreviewMigration.ts";
@@ -126,7 +127,7 @@ import Migration0112 from "./Migrations/112_TurnItemInlineWorkOutput.ts";
 import Migration0113 from "./Migrations/113_RepairSubagentGroups.ts";
 import Migration0114 from "./Migrations/114_ProjectKnowledgeRecallIndex.ts";
 
-const migrationEntries = [
+export const migrationEntries = [
   [1, "OrchestrationEvents", Migration0001],
   [2, "OrchestrationCommandReceipts", Migration0002],
   [3, "CheckpointDiffBlobs", Migration0003],
@@ -333,6 +334,10 @@ export const runMigrations = Effect.fn("runMigrations")(function* ({
   const includesV2 =
     toMigrationInclusive === undefined || toMigrationInclusive >= FIRST_V2_MIGRATION_ID;
   const previewMigrations = includesV2 ? yield* reconcileV2PreviewMigration() : [];
+  const officialMigrations =
+    toMigrationInclusive === undefined
+      ? yield* reconcileOfficialMigrationHistory(migrationEntries)
+      : [];
   const knowledgePreviewMigrations =
     toMigrationInclusive === undefined || toMigrationInclusive >= 80
       ? yield* reconcileProjectKnowledgePreviewMigration(migrationManifest)
@@ -367,6 +372,7 @@ export const runMigrations = Effect.fn("runMigrations")(function* ({
   // restart then resumes after the last finished migration instead of rolling all of them back.
   const executedMigrations: Array<readonly [id: number, name: string]> = [
     ...previewMigrations,
+    ...officialMigrations,
     ...knowledgePreviewMigrations,
     ...savedKnowledgePreviewMigrations,
     ...knowledgeViewsPreviewMigrations,
