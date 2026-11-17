@@ -9,7 +9,7 @@
 <p align="center">The open-source control plane for coding agents.</p>
 
 <p align="center">
-  <a href="https://github.com/ScriptedAlchemy/t3code/releases"><strong>Download</strong></a> ·
+  <a href="#install"><strong>Install</strong></a> ·
   <a href="./docs/README.md">Docs</a> ·
   <a href="https://discord.gg/jn4EGJjrvv">Discord</a>
 </p>
@@ -20,7 +20,12 @@
   </a>
 </p>
 
-This repository is the **ScriptedAlchemy fork** of [T3 Code](https://github.com/pingdotgg/t3code). The fork's [Nightly releases](https://github.com/ScriptedAlchemy/t3code/releases) include the desktop app and the standalone `t3` CLI with its bundled web app. Install these builds to use this fork's features. The upstream hosted web app, mobile store apps, npm package, and community packages are separate distributions; see [Upstream distributions](#upstream-distributions).
+This repository is **naftpink's fork** of [ScriptedAlchemy's fork](https://github.com/ScriptedAlchemy/t3code) of [T3 Code](https://github.com/pingdotgg/t3code). It tracks ScriptedAlchemy's `main` and adds, on its own branch:
+
+- a **Discord bridge** that starts, steers and approves agent threads from Discord, with each provider speaking as its own bot (in progress; see `apps/discord-bridge` once it lands);
+- a native **DeepSeek provider** with usage tracking (planned).
+
+Everything else is ScriptedAlchemy's and T3 Tools' work, and the MIT license of the original project applies. Upstream's hosted web app, mobile store apps, npm package, and community packages are separate distributions; see [Upstream distributions](#upstream-distributions).
 
 T3 Code runs the coding agents on your machine and gives them one fast interface. Start a thread at your desk, then approve the next step from your phone.
 
@@ -40,7 +45,7 @@ It works with Claude Code, Codex, Cursor, OpenCode, Grok Build, Antigravity, Kir
 
 ### Desktop app
 
-Install the desktop app for your platform from the fork's [GitHub Releases](https://github.com/ScriptedAlchemy/t3code/releases). Keep its update track on **Nightly**, which is the track this fork currently publishes.
+This fork does not publish prebuilt releases yet. To use it, build it from source ([Install T3 Code](./docs/user/install.md) has the steps). ScriptedAlchemy's [Nightly releases](https://github.com/ScriptedAlchemy/t3code/releases) are the closest prebuilt option, but they do not include this fork's additions.
 
 On Debian or Ubuntu, download the fork's `.deb` from that release, then:
 
