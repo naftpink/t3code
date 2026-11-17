@@ -23,7 +23,7 @@
 This repository is **naftpink's fork** of [ScriptedAlchemy's fork](https://github.com/ScriptedAlchemy/t3code) of [T3 Code](https://github.com/pingdotgg/t3code). It tracks ScriptedAlchemy's `main` and adds, on its own branch:
 
 - a **Discord bridge** that starts, steers and approves agent threads from Discord, with each provider speaking as its own bot (in progress; see `apps/discord-bridge` once it lands);
-- a native **DeepSeek provider** with usage tracking (planned).
+- a native **DeepSeek provider** that drives DeepSeek Harness (`dsh`) over ACP and shows your account balance; see [DeepSeek](./docs/user/providers-deepseek.md).
 
 Everything else is ScriptedAlchemy's and T3 Tools' work, and the MIT license of the original project applies. Upstream's hosted web app, mobile store apps, npm package, and community packages are separate distributions; see [Upstream distributions](#upstream-distributions).
 
