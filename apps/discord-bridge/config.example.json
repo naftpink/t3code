@@ -1,0 +1,29 @@
+{
+  "t3": {
+    "origin": "http://127.0.0.1:13773",
+    "tokenFile": ".secrets/t3-token.txt",
+    "workspaceRoot": "workspace"
+  },
+  "discord": {
+    "guildId": "YOUR_SERVER_ID",
+    "allowedUserId": "YOUR_DISCORD_USER_ID",
+    "controlBot": "claude"
+  },
+  "bots": {
+    "claude": {
+      "label": "Claude",
+      "instanceId": "claudeAgent",
+      "model": "claude-sonnet-5-5",
+      "tokenFile": ".secrets/discord-claude.txt"
+    },
+    "codex": {
+      "label": "Codex",
+      "instanceId": "codex",
+      "model": "gpt-6.1-sol",
+      "tokenFile": ".secrets/discord-codex.txt"
+    }
+  },
+  "runtimeMode": "approval-required",
+  "midRunMode": "queue",
+  "pingOnDone": true
+}
