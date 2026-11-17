@@ -118,6 +118,7 @@ const CODEX_DRIVER_KIND = ProviderDriverKind.make("codex");
 const CLAUDE_DRIVER_KIND = ProviderDriverKind.make("claudeAgent");
 const CURSOR_DRIVER_KIND = ProviderDriverKind.make("cursor");
 const GROK_DRIVER_KIND = ProviderDriverKind.make("grok");
+const DEEPSEEK_DRIVER_KIND = ProviderDriverKind.make("deepseek");
 const FX_DRIVER_KIND = ProviderDriverKind.make("fx");
 const KIRO_DRIVER_KIND = ProviderDriverKind.make("kiro");
 const MUSE_DRIVER_KIND = ProviderDriverKind.make("muse");
@@ -200,6 +201,7 @@ export const PROVIDER_DISPLAY_NAMES: Partial<Record<ProviderDriverKind, string>>
   [CLAUDE_DRIVER_KIND]: "Claude",
   [CURSOR_DRIVER_KIND]: "Cursor",
   [GROK_DRIVER_KIND]: "Grok",
+  [DEEPSEEK_DRIVER_KIND]: "DeepSeek",
   [FX_DRIVER_KIND]: "fx",
   [KIRO_DRIVER_KIND]: "Kiro",
   [MUSE_DRIVER_KIND]: "Muse Code",
