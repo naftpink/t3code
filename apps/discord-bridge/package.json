@@ -1,0 +1,17 @@
+{
+  "name": "@t3tools/discord-bridge",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Run and approve T3 Code agent threads from Discord, with one bot per provider.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.ts",
+    "dry-run": "node src/index.ts --dry-run",
+    "typecheck": "effect-tsgo tsrs --noEmit"
+  },
+  "dependencies": {
+    "@t3tools/contracts": "workspace:*",
+    "discord.js": "^14.28.1",
+    "effect": "catalog:"
+  }
+}
