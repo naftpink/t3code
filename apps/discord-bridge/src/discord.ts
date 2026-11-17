@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off globalConsole:off globalTimers:off globalDate:off globalFetch:off cryptoRandomUUID:off anyUnknownInErrorContext:off - Standalone bot process written as plain async Node; Effect is used only where the RPC client requires it.
 // Discord transport: one discord.js client per bot. The control bot owns slash commands and reads messages;
 // every bot handles button presses, because Discord delivers a button click to the app that posted it.
 import {

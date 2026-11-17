@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off globalConsole:off globalTimers:off globalDate:off globalFetch:off cryptoRandomUUID:off anyUnknownInErrorContext:off - Standalone bot process written as plain async Node; Effect is used only where the RPC client requires it.
 // Core logic: mirrors T3 threads into chat threads, and chat messages/buttons back into T3 commands.
 import * as NodeCrypto from "node:crypto";
 import * as NodeFS from "node:fs";

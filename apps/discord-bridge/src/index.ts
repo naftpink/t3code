@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off globalConsole:off globalTimers:off globalDate:off globalFetch:off cryptoRandomUUID:off anyUnknownInErrorContext:off - Standalone bot process written as plain async Node; Effect is used only where the RPC client requires it.
 import * as NodeFS from "node:fs";
 import { Bridge } from "./bridge.ts";
 import { DryRunChat, type Chat } from "./chat.ts";

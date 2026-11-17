@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off globalConsole:off globalTimers:off globalDate:off globalFetch:off cryptoRandomUUID:off anyUnknownInErrorContext:off - Standalone bot process written as plain async Node; Effect is used only where the RPC client requires it.
 // Thin client for a T3 server: scoped bearer token -> WebSocket ticket -> Effect RPC client.
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
