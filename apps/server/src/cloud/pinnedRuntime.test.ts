@@ -75,7 +75,7 @@ it.layer(NodeServices.layer)("ensurePinnedRuntimeInstalled", (it) => {
   it.effect.each([
     {
       releaseBaseUrl: undefined,
-      expectedBaseUrl: "https://github.com/ScriptedAlchemy/t3code/releases/download",
+      expectedBaseUrl: "https://github.com/naftpink/t3code/releases/download",
     },
     {
       releaseBaseUrl: "https://releases.example/download",

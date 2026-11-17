@@ -85,10 +85,10 @@ describe("desktop update UI helpers", () => {
     "keeps this build's release source when repository metadata is absent or invalid: %s",
     (repository) => {
       expect(getDesktopUpdateReleaseHistoryUrl(repository)).toBe(
-        "https://github.com/ScriptedAlchemy/t3code/releases",
+        "https://github.com/naftpink/t3code/releases",
       );
       expect(getDesktopUpdateReleaseUrl("1.2.3", repository)).toBe(
-        "https://github.com/ScriptedAlchemy/t3code/releases/tag/v1.2.3",
+        "https://github.com/naftpink/t3code/releases/tag/v1.2.3",
       );
     },
   );

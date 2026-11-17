@@ -13,10 +13,10 @@ import * as NpmRelease from "./npmRelease.ts";
 import { trackSwitchBlockReason } from "./selfUpdate.ts";
 
 const version = "0.1.5-nightly.20261030.1";
-const repository = "https://api.github.com/repos/ScriptedAlchemy/t3code/releases";
+const repository = "https://api.github.com/repos/naftpink/t3code/releases";
 const indexUrl = `${repository}?per_page=100&page=1`;
 const metadataUrl = (releaseVersion: string) =>
-  `https://github.com/ScriptedAlchemy/t3code/releases/download/v${releaseVersion}/t3-release.json`;
+  `https://github.com/naftpink/t3code/releases/download/v${releaseVersion}/t3-release.json`;
 const json = (value: unknown) => new Response(JSON.stringify(value));
 const makeService = (
   reply: (request: HttpClientRequest.HttpClientRequest) => Response,

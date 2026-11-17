@@ -1,0 +1,5 @@
+# Local configuration and secrets never get committed.
+config.json
+.secrets/
+state*.json
+sandbox/

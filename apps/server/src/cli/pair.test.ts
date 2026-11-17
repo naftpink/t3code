@@ -496,10 +496,7 @@ describe("t3 pair", () => {
           assert.isTrue(Exit.isFailure(exit));
           if (Exit.isFailure(exit)) {
             const message = String(Cause.squash(exit.cause));
-            assert.include(
-              message,
-              "https://github.com/ScriptedAlchemy/t3code/releases/tag/v0.0.45",
-            );
+            assert.include(message, "https://github.com/naftpink/t3code/releases/tag/v0.0.45");
             assert.include(message, `t3 pair --base-dir ${baseDir}`);
           }
         }),
